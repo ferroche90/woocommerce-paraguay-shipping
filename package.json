@@ -1,17 +1,17 @@
 {
 	"name": "woocommerce-paraguay-shipping",
-	"title": "YITH WAPO Import Export Plugin",
-	"description": "A plugin to import/export product addons from YITH WooCommerce Product Add-Ons & Extra Options",
-	"version": "1.0.0",
+	"title": "WooCommerce Paraguay Shipping",
+	"description": "This plugin provides a custom shipping method for WooCommerce tailored to Paraguay, allowing merchants to set different shipping rates according to the different cities within the country.",
+	"version": "1.0.1",
 	"scripts": {
-		"prebuild": "rd /s /q ./vendor",
+		"prebuild": "rm -rf ./vendor",
 		"build": "composer install -o --no-dev && npm run archive",
 		"build:dev": "composer install -o",
 		"archive": "composer archive --file=$npm_package_name --format=zip",
 		"postarchive": "rm -rf $npm_package_name && unzip $npm_package_name.zip -d $npm_package_name && rm $npm_package_name.zip && zip -r $npm_package_name.zip $npm_package_name && rm -rf $npm_package_name",
 		"bump": "node version-bump.js",
 		"bump:major": "node version-bump.js major"
-	},
+	  },
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/ferroche90/woocommerce-paraguay-shipping.git"
