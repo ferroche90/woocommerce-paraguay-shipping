@@ -4,7 +4,7 @@
  * Usage:
  * npm run bump||npm run bump:major
  *
- * @package WooCommerce/ParaguayShipping
+ * @package WooCommerce/woocommerce-paraguay-shipping
  */
 
 const fs = require( 'fs' );
