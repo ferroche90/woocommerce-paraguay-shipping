@@ -20,7 +20,7 @@ if (!class_exists('WC_Paraguay_Shipping')) {
         }
 
         public function init() {
-            //require_once plugin_dir_path(__FILE__) . 'includes/class-wc-shipping-paraguay.php';
+            require_once plugin_dir_path(__FILE__) . 'includes/class-wc-shipping-paraguay.php';
         }
 
         public function add_method($methods) {
