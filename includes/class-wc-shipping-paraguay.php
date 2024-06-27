@@ -104,7 +104,7 @@ if ( ! class_exists( 'WC_Shipping_Paraguay' ) ) {
 			}
 
 			if ( ! $city_matched ) {
-				wc_add_notice( __( 'The city and department added do not match.', 'woocommerce-paraguay-shipping' ), 'error' );
+				wc_add_notice( __( 'La ciudad y el departamento agregados no coinciden.', 'woocommerce-paraguay-shipping' ), 'error' );
 				return;
 			}
 
