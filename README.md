@@ -21,8 +21,11 @@ Once the plugin is activated, you can access its functionalities through the Wor
 
 ## Changelog
 
+### 1.0.1
+- Shipping calculation added.
+
 ### 1.0.0
-- Initial release
+- Initial release.
 
 ## Support and Feedback
 
