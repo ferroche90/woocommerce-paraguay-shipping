@@ -95,22 +95,15 @@ if ( ! class_exists( 'WC_Shipping_Paraguay' ) ) {
 			$special_rates               = $this->parse_rates( $pickup_locations, false );
 			$default_rate                = $this->get_option( 'default_rate' );
 			$cost                        = $default_rate;
-			$city_matched                = false;
 
 			if ( isset( $city_rates[ $destination_city ][ $destination_department ] ) ) {
 				$rate_info    = $city_rates[ $destination_city ][ $destination_department ];
 				$cost         = $rate_info['rate'];
-				$city_matched = true;
-			}
-
-			if ( ! $city_matched ) {
-				wc_add_notice( __( 'La ciudad y el departamento agregados no coinciden.', 'woocommerce-paraguay-shipping' ), 'error' );
-				return;
 			}
 
 			$rate = array(
 				'id'       => $this->id,
-				'label'    => $this->get_option( 'title' ) . ' a ' . $rate_info['display']['city'] . ', ' . $rate_info['display']['department'],
+				'label'    => $this->get_option( 'title' ) . ' a ' . $package['destination']['city'],
 				'cost'     => $cost,
 				'calc_tax' => 'per_item',
 			);
