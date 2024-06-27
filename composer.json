@@ -1,0 +1,61 @@
+{
+	"name": "woocommerce/woocommerce-paraguay-shipping",
+	"description": "A WooCommerce shipping method for Paraguay with city-based rates.",
+	"type": "wordpress-plugin",
+	"license": "GPL-3.0",
+	"require": {
+		"automattic/jetpack-autoloader": "^2.11",
+		"tecnickcom/tcpdf": "^6.6"
+	},
+	"require-dev": {
+		"squizlabs/php_codesniffer": "*",
+		"dealerdirect/phpcodesniffer-composer-installer": "*",
+		"wp-coding-standards/wpcs": "*",
+		"woocommerce/woocommerce-sniffs": "*"
+	},
+	"config": {
+		"allow-plugins": {
+			"dealerdirect/phpcodesniffer-composer-installer": true,
+			"automattic/jetpack-autoloader": true
+		}
+	},
+	"autoload": {
+		"psr-4": {
+			"Progressus\\YithImportExport\\": "src/"
+		}
+	},
+	"archive": {
+		"exclude": [
+			"!/assets",
+			"!/languages",
+			"!/vendor",
+			"composer.json",
+			"composer.lock",
+			"package.json",
+			"package-lock.json",
+			".gitignore",
+			"README.md",
+			"version-bump.js",
+			".nvmrc",
+			".phpcs.security.xml",
+			"yith-wapo-import-export.zip"
+		]
+	},
+	"scripts": {
+		"check-security": [
+			"./vendor/bin/phpcs . --ignore=vendor,.git,assets,node_modules --standard=./.phpcs.security.xml  --report-full --report-summary"
+		],
+		"check-php": [
+			"./vendor/bin/phpcs . --ignore=vendor,.git,assets,node_modules --standard=WooCommerce-Core,WordPress-Core,WordPress-Extra  --report-full --report-summary --colors"
+		],
+		"check-php:fix": [
+			"./vendor/bin/phpcbf . --ignore=vendor,.git,assets,node_modules --standard=WooCommerce-Core,WordPress-Core,WordPress-Extra  --report-full --report-summary --colors"
+		],
+		"check-all": [
+			"./vendor/bin/phpcs . --ignore=vendor,.git,assets,node_modules --standard=WooCommerce-Core,WordPress-Core,WordPress-Extra,WordPress-Docs  --report-full --report-summary --colors"
+		],
+		"check-all:fix": [
+			"./vendor/bin/phpcbf . --ignore=vendor,.git,assets,node_modules --standard=WooCommerce-Core,WordPress-Core,WordPress-Extra,WordPress-Docs  --report-full --report-summary --colors"
+		]
+	}
+}
