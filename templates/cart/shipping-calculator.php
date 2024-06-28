@@ -127,7 +127,7 @@ do_action( 'woocommerce_before_shipping_calculator' ); ?>
 			if (!selectedCity) {
 				// Add WooCommerce error notice if it doesn't exist
 				if (!$('.woocommerce-error.select-city-error').length) {
-					$('.woocommerce-notices-wrapper').prepend('<div class="woocommerce-error select-city-error"><?php esc_html_e( "Seleccione una ciudad de envío antes de realizar el pago.", "woocommerce" ); ?></div>');
+					$('.woocommerce-notices-wrapper').prepend('<div class="woocommerce-error select-city-error"><?php esc_html_e( 'Seleccione una ciudad de envío antes de realizar el pago.', 'woocommerce' ); ?></div>');
 					$('html, body').animate({ scrollTop: 0 }, 'slow'); // Scroll to the top
 				}
 				return false;
