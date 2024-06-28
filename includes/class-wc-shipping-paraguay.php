@@ -102,7 +102,7 @@ if ( ! class_exists( 'WC_Shipping_Paraguay' ) ) {
 			$original_city    = $destination_city;
 
 			if ( isset( $city_rates[ $normalized_city ] ) ) {
-				$cost = $city_rates[ $normalized_city ]['rate'];
+				$cost          = $city_rates[ $normalized_city ]['rate'];
 				$original_city = $city_rates[ $normalized_city ]['original'];
 			}
 
@@ -136,22 +136,22 @@ if ( ! class_exists( 'WC_Shipping_Paraguay' ) ) {
 		public function parse_rates( $rates ) {
 			$lines      = explode( "\n", $rates );
 			$city_rates = array();
-		
+
 			foreach ( $lines as $line ) {
 				list( $city, $department, $rate ) = explode( '|', trim( $line ) );
-				$normalized_city                 = $this->normalize_city_name( trim( $city ) );
+				$normalized_city                  = $this->normalize_city_name( trim( $city ) );
 				$department                       = trim( $department );
 				$rate                             = trim( $rate );
-		
+
 				$city_rates[ $normalized_city ] = array(
 					'original'   => $city,
 					'department' => $department,
 					'rate'       => $rate,
 				);
 			}
-		
+
 			return $city_rates;
-		}	
+		}
 
 		/**
 		 * Parse the special rates entered in the settings.
@@ -160,8 +160,8 @@ if ( ! class_exists( 'WC_Shipping_Paraguay' ) ) {
 		 * @return array Parsed special rates.
 		 */
 		public function parse_special_rates( $rates ) {
-			$lines          = explode( "\n", $rates );
-			$special_rates  = array();
+			$lines         = explode( "\n", $rates );
+			$special_rates = array();
 
 			foreach ( $lines as $line ) {
 				list( $location, $rate ) = explode( '|', trim( $line ) );
@@ -214,7 +214,7 @@ if ( ! class_exists( 'WC_Shipping_Paraguay' ) ) {
 				$city = Normalizer::normalize( $city, Normalizer::FORM_C );
 			}
 			// Remove accents.
-			$city = transliterator_transliterate('Any-Latin; Latin-ASCII;', $city);
+			$city = transliterator_transliterate( 'Any-Latin; Latin-ASCII;', $city );
 			return strtolower( $city );
 		}
 	}
