@@ -21,6 +21,9 @@ Once the plugin is activated, you can access its functionalities through the Wor
 
 ## Changelog
 
+### 1.2.1
+- Fix normalize city text.
+
 ### 1.2.0
 - Add error notice on cart when no shipping city is added.
 
