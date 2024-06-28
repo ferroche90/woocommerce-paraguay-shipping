@@ -97,8 +97,8 @@ if ( ! class_exists( 'WC_Shipping_Paraguay' ) ) {
 			$cost                        = $default_rate;
 
 			if ( isset( $city_rates[ $destination_city ][ $destination_department ] ) ) {
-				$rate_info    = $city_rates[ $destination_city ][ $destination_department ];
-				$cost         = $rate_info['rate'];
+				$rate_info = $city_rates[ $destination_city ][ $destination_department ];
+				$cost      = $rate_info['rate'];
 			}
 
 			$rate = array(
@@ -143,7 +143,7 @@ if ( ! class_exists( 'WC_Shipping_Paraguay' ) ) {
 		 * Parse the rates entered in the settings.
 		 *
 		 * @param string $rates The rates entered in the settings.
-		 * @param bool $normalize Whether to normalize the keys for matching.
+		 * @param bool   $normalize Whether to normalize the keys for matching.
 		 * @return array Parsed city rates.
 		 */
 		private function parse_rates( $rates, $normalize = true ) {
@@ -152,19 +152,19 @@ if ( ! class_exists( 'WC_Shipping_Paraguay' ) ) {
 
 			foreach ( $lines as $line ) {
 				list( $city, $department, $rate ) = explode( '|', trim( $line ) );
-				$city = trim( $city );
-				$department = trim( $department );
-				$rate = trim( $rate );
+				$city                             = trim( $city );
+				$department                       = trim( $department );
+				$rate                             = trim( $rate );
 
 				if ( $normalize ) {
-					$normalized_city = $this->remove_accents( $city );
+					$normalized_city       = $this->remove_accents( $city );
 					$normalized_department = $this->remove_accents( $department );
 					$city_rates[ $normalized_city ][ $normalized_department ] = array(
-						'rate' => $rate,
+						'rate'    => $rate,
 						'display' => array(
-							'city' => $city,
-							'department' => $department
-						)
+							'city'       => $city,
+							'department' => $department,
+						),
 					);
 				} else {
 					$city_rates[ $city ][ $department ] = $rate;

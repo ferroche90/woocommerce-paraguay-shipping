@@ -2,7 +2,7 @@
 	"name": "woocommerce-paraguay-shipping",
 	"title": "WooCommerce Paraguay Shipping",
 	"description": "This plugin provides a custom shipping method for WooCommerce tailored to Paraguay, allowing merchants to set different shipping rates according to the different cities within the country.",
-	"version": "1.0.2",
+	"version": "1.1.0",
 	"scripts": {
 		"prebuild": "rm -rf ./vendor",
 		"build": "composer install -o --no-dev && npm run archive",

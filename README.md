@@ -21,6 +21,9 @@ Once the plugin is activated, you can access its functionalities through the Wor
 
 ## Changelog
 
+### 1.1.0
+- Add shipping calculator template.
+
 ### 1.0.2
 - Removed error notice.
 
