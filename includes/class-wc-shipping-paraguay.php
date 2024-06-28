@@ -80,7 +80,11 @@ if ( ! class_exists( 'WC_Shipping_Paraguay' ) ) {
 		 * @param array $package The package being shipped.
 		 */
 		public function calculate_shipping( $package = array() ) {
-			$destination_city = $package['destination']['city'];
+			$destination_city = isset($package['destination']['city']) ? $package['destination']['city'] : '';
+			if (empty($destination_city)) {
+				return; // Don't add shipping rates if the city is not set.
+			}
+
 			$rates            = $this->get_option( 'rates' );
 			$pickup_locations = $this->get_option( 'pickup_locations' );
 			$city_rates       = $this->parse_rates( $rates );
