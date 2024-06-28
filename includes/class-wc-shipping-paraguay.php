@@ -59,6 +59,12 @@ if ( ! class_exists( 'WC_Shipping_Paraguay' ) ) {
 					'description' => __( 'Title to be displayed on the checkout page.', 'woocommerce-paraguay-shipping' ),
 					'default'     => __( 'Paraguay Shipping', 'woocommerce-paraguay-shipping' ),
 				),
+				'default_cost'     => array(
+					'title'       => __( 'Default Cost', 'woocommerce-paraguay-shipping' ),
+					'type'        => 'number',
+					'description' => __( 'Default cost to be applied if the city is not found in the rates.', 'woocommerce-paraguay-shipping' ),
+					'default'     => '',
+				),
 				'rates'            => array(
 					'title'       => __( 'Rates', 'woocommerce-paraguay-shipping' ),
 					'type'        => 'textarea',
@@ -85,30 +91,35 @@ if ( ! class_exists( 'WC_Shipping_Paraguay' ) ) {
 				return; // Don't add shipping rates if the city is not set.
 			}
 
+			$normalized_city = $this->normalize_city_name( $destination_city );
+
 			$rates            = $this->get_option( 'rates' );
 			$pickup_locations = $this->get_option( 'pickup_locations' );
 			$city_rates       = $this->parse_rates( $rates );
-			$special_rates    = $this->parse_rates( $pickup_locations, false );
-			$cost             = 0;
+			$special_rates    = $this->parse_special_rates( $pickup_locations );
+			$default_cost     = $this->get_option( 'default_cost' );
+			$cost             = $default_cost;
+			$original_city    = $destination_city;
 
-			if ( isset( $city_rates[ $destination_city ] ) ) {
-				$cost = $city_rates[ $destination_city ]['rate'];
+			if ( isset( $city_rates[ $normalized_city ] ) ) {
+				$cost = $city_rates[ $normalized_city ]['rate'];
+				$original_city = $city_rates[ $normalized_city ]['original'];
 			}
 
 			$rate = array(
 				'id'       => $this->id,
-				'label'    => $this->get_option( 'title' ) . ' a ' . $destination_city,
+				'label'    => $this->get_option( 'title' ) . ' a ' . $original_city,
 				'cost'     => $cost,
 				'calc_tax' => 'per_item',
 			);
 
 			$this->add_rate( $rate );
 
-			foreach ( $special_rates as $location => $rate_cost ) {
+			foreach ( $special_rates as $location => $rate_info ) {
 				$pickup_rate = array(
 					'id'       => $this->id . '_' . sanitize_title( $location ),
-					'label'    => $location,
-					'cost'     => $rate_cost['rate'],
+					'label'    => $rate_info['original'],
+					'cost'     => $rate_info['rate'],
 					'calc_tax' => 'per_item',
 				);
 
@@ -120,26 +131,50 @@ if ( ! class_exists( 'WC_Shipping_Paraguay' ) ) {
 		 * Parse the rates entered in the settings.
 		 *
 		 * @param string $rates The rates entered in the settings.
-		 * @param bool   $normalize Whether to normalize the keys for matching.
 		 * @return array Parsed city rates.
 		 */
 		public function parse_rates( $rates ) {
 			$lines      = explode( "\n", $rates );
 			$city_rates = array();
-
+		
 			foreach ( $lines as $line ) {
 				list( $city, $department, $rate ) = explode( '|', trim( $line ) );
-				$city                             = trim( $city );
+				$normalized_city                 = $this->normalize_city_name( trim( $city ) );
 				$department                       = trim( $department );
 				$rate                             = trim( $rate );
-
-				$city_rates[ $city ] = array(
+		
+				$city_rates[ $normalized_city ] = array(
+					'original'   => $city,
 					'department' => $department,
 					'rate'       => $rate,
 				);
 			}
-
+		
 			return $city_rates;
+		}	
+
+		/**
+		 * Parse the special rates entered in the settings.
+		 *
+		 * @param string $rates The rates entered in the settings.
+		 * @return array Parsed special rates.
+		 */
+		public function parse_special_rates( $rates ) {
+			$lines          = explode( "\n", $rates );
+			$special_rates  = array();
+
+			foreach ( $lines as $line ) {
+				list( $location, $rate ) = explode( '|', trim( $line ) );
+				$normalized_location     = $this->normalize_city_name( trim( $location ) );
+				$rate                    = trim( $rate );
+
+				$special_rates[ $normalized_location ] = array(
+					'original' => $location,
+					'rate'     => $rate,
+				);
+			}
+
+			return $special_rates;
 		}
 
 		/**
@@ -166,6 +201,21 @@ if ( ! class_exists( 'WC_Shipping_Paraguay' ) ) {
 			}
 
 			return $cities;
+		}
+
+		/**
+		 * Normalize city name to a canonical form.
+		 *
+		 * @param string $city The city name to normalize.
+		 * @return string The normalized city name.
+		 */
+		private function normalize_city_name( $city ) {
+			if ( class_exists( 'Normalizer' ) ) {
+				$city = Normalizer::normalize( $city, Normalizer::FORM_C );
+			}
+			// Remove accents.
+			$city = transliterator_transliterate('Any-Latin; Latin-ASCII;', $city);
+			return strtolower( $city );
 		}
 	}
 }
