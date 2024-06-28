@@ -40,8 +40,6 @@ if ( ! class_exists( 'WC_Shipping_Paraguay' ) ) {
 
 			// Save settings in admin if you have any defined.
 			add_action( 'woocommerce_update_options_shipping_' . $this->id, array( $this, 'process_admin_options' ) );
-			add_action( 'woocommerce_checkout_process', array( $this, 'validate_city_selection' ) );
-			add_action( 'woocommerce_before_checkout_form', array( $this, 'display_city_notice' ) );
 		}
 
 		/**
@@ -168,39 +166,6 @@ if ( ! class_exists( 'WC_Shipping_Paraguay' ) ) {
 			}
 
 			return $cities;
-		}
-
-		/**
-		 * Validate if a shipping city is selected.
-		 */
-		public function validate_city_selection() {
-			$chosen_methods = WC()->session->get( 'chosen_shipping_methods' );
-			$chosen_method  = isset( $chosen_methods[0] ) ? $chosen_methods[0] : '';
-
-			if ( empty( $chosen_method ) || $chosen_method !== $this->id ) {
-				return; // If no shipping method is selected or the method is not Paraguay Shipping, skip validation.
-			}
-
-			$destination_city = WC()->customer->get_shipping_city();
-
-			if ( empty( $destination_city ) ) {
-				wc_add_notice( __( 'Please select a city for shipment.', 'woocommerce-paraguay-shipping' ), 'error' );
-			}
-		}
-
-		/**
-		 * Display a notice if no city is selected.
-		 */
-		public function display_city_notice() {
-			if ( ! is_cart() ) {
-				return; // Only display notice on the cart page.
-			}
-
-			$destination_city = WC()->customer->get_shipping_city();
-
-			if ( empty( $destination_city ) ) {
-				wc_print_notice( __( 'Please select a city for shipment before proceeding to checkout.', 'woocommerce-paraguay-shipping' ), 'notice' );
-			}
 		}
 	}
 }

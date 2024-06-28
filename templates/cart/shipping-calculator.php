@@ -122,11 +122,33 @@ do_action( 'woocommerce_before_shipping_calculator' ); ?>
 
 <script type="text/javascript">
 	jQuery(document).ready(function($) {
-		$('#calc_shipping_city').change(function() {
-			var selectedCity = $(this).val();
-			var department = $(this).find(':selected').data('department');
+		function validateCitySelection() {
+			var selectedCity = $('#calc_shipping_city').val();
+			if (!selectedCity) {
+				// Add WooCommerce error notice if it doesn't exist
+				if (!$('.woocommerce-error.select-city-error').length) {
+					$('.woocommerce-notices-wrapper').prepend('<div class="woocommerce-error select-city-error"><?php esc_html_e( "Seleccione una ciudad de envío antes de realizar el pago.", "woocommerce" ); ?></div>');
+					$('html, body').animate({ scrollTop: 0 }, 'slow'); // Scroll to the top
+				}
+				return false;
+			}
+			// Remove error notice if city is selected
+			$('.woocommerce-error.select-city-error').remove();
+			return true;
+		}
 
-			$('#calc_shipping_state').val(department);
+		// Add click event to the "Proceed to checkout" button
+		$('a.checkout-button').on('click', function(e) {
+			if (!validateCitySelection()) {
+				e.preventDefault(); // Prevent the default action of the button
+			}
+		});
+
+		// Additional event to handle form submission directly
+		$('form.cart').on('submit', function(e) {
+			if (!validateCitySelection()) {
+				e.preventDefault(); // Prevent the form from submitting
+			}
 		});
 	});
 </script>
