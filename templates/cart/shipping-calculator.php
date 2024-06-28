@@ -17,6 +17,17 @@
 
 defined( 'ABSPATH' ) || exit;
 
+// Retrieve the instance of the shipping method
+$shipping_methods   = WC()->shipping()->get_shipping_methods();
+$cities             = array();
+$cities_departments = array();
+
+if ( isset( $shipping_methods['paraguay_shipping'] ) ) {
+	$paraguay_shipping        = $shipping_methods['paraguay_shipping'];
+	$cities                   = $paraguay_shipping->get_cities();
+	$cities_departments_rates = $paraguay_shipping->parse_rates( $paraguay_shipping->get_option( 'rates' ) );
+}
+
 do_action( 'woocommerce_before_shipping_calculator' ); ?>
 
 <form class="woocommerce-shipping-calculator" action="<?php echo esc_url( wc_get_cart_url() ); ?>" method="post">
@@ -26,6 +37,12 @@ do_action( 'woocommerce_before_shipping_calculator' ); ?>
 	<section class="shipping-calculator-form" style="display:none;">
 
 		<?php if ( apply_filters( 'woocommerce_shipping_calculator_enable_country', true ) ) : ?>
+			<style>
+				#calc_shipping_country_field,
+				#calc_shipping_country {
+					display:none !important;
+				}
+			</style>
 			<p class="form-row form-row-wide" id="calc_shipping_country_field">
 				<label for="calc_shipping_country" class="screen-reader-text"><?php esc_html_e( 'Country / region:', 'woocommerce' ); ?></label>
 				<select name="calc_shipping_country" id="calc_shipping_country" class="country_to_state country_select" rel="calc_shipping_state">
@@ -40,6 +57,12 @@ do_action( 'woocommerce_before_shipping_calculator' ); ?>
 		<?php endif; ?>
 
 		<?php if ( apply_filters( 'woocommerce_shipping_calculator_enable_state', true ) ) : ?>
+			<style>
+				#calc_shipping_state_field,
+				#calc_shipping_state {
+					display:none !important;
+				}
+			</style>
 			<p class="form-row form-row-wide" id="calc_shipping_state_field">
 				<?php
 				$current_cc = WC()->customer->get_shipping_country();
@@ -77,14 +100,35 @@ do_action( 'woocommerce_before_shipping_calculator' ); ?>
 		<?php if ( apply_filters( 'woocommerce_shipping_calculator_enable_city', true ) ) : ?>
 			<p class="form-row form-row-wide" id="calc_shipping_city_field">
 				<label for="calc_shipping_city" class="screen-reader-text"><?php esc_html_e( 'City:', 'woocommerce' ); ?></label>
-				<input type="text" class="input-text" value="<?php echo esc_attr( WC()->customer->get_shipping_city() ); ?>" placeholder="<?php esc_attr_e( 'City', 'woocommerce' ); ?>" name="calc_shipping_city" id="calc_shipping_city" />
+				<span>
+					<select name="calc_shipping_city" class="city_select state_select" id="calc_shipping_city" data-placeholder="<?php esc_attr_e( 'City', 'woocommerce' ); ?>">
+						<option value=""><?php esc_html_e( 'Select a city&hellip;', 'woocommerce' ); ?></option>
+						<?php
+						if ( $cities ) {
+							foreach ( $cities as $city => $data ) {
+								echo '<option value="' . esc_attr( $city ) . '" data-department="' . esc_attr( $data['department'] ) . '">' . esc_html( $city ) . '</option>';
+							}
+						}
+						?>
+					</select>
+				</span>
 			</p>
 		<?php endif; ?>
-
 
 		<p><button type="submit" name="calc_shipping" value="1" class="button<?php echo esc_attr( wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_theme_get_element_class_name( 'button' ) : '' ); ?>"><?php esc_html_e( 'Update', 'woocommerce' ); ?></button></p>
 		<?php wp_nonce_field( 'woocommerce-shipping-calculator', 'woocommerce-shipping-calculator-nonce' ); ?>
 	</section>
 </form>
+
+<script type="text/javascript">
+	jQuery(document).ready(function($) {
+		$('#calc_shipping_city').change(function() {
+			var selectedCity = $(this).val();
+			var department = $(this).find(':selected').data('department');
+
+			$('#calc_shipping_state').val(department);
+		});
+	});
+</script>
 
 <?php do_action( 'woocommerce_after_shipping_calculator' ); ?>

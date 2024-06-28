@@ -59,16 +59,10 @@ if ( ! class_exists( 'WC_Shipping_Paraguay' ) ) {
 					'description' => __( 'Title to be displayed on the checkout page.', 'woocommerce-paraguay-shipping' ),
 					'default'     => __( 'Paraguay Shipping', 'woocommerce-paraguay-shipping' ),
 				),
-				'default_rate'     => array(
-					'title'       => __( 'Default Rate', 'woocommerce-paraguay-shipping' ),
-					'type'        => 'text',
-					'description' => __( 'Default shipping rate for cities not listed.', 'woocommerce-paraguay-shipping' ),
-					'default'     => '',
-				),
 				'rates'            => array(
 					'title'       => __( 'Rates', 'woocommerce-paraguay-shipping' ),
 					'type'        => 'textarea',
-					'description' => __( 'Enter rates for different cities in the format: City|Rate per kg. One city per line.', 'woocommerce-paraguay-shipping' ),
+					'description' => __( 'Enter rates for different cities in the format: City|Department|Rate. One city per line.', 'woocommerce-paraguay-shipping' ),
 					'default'     => '',
 				),
 				'pickup_locations' => array(
@@ -81,29 +75,25 @@ if ( ! class_exists( 'WC_Shipping_Paraguay' ) ) {
 		}
 
 		/**
-		 * Calculate shipping cost based on destination city and department.
+		 * Calculate shipping cost based on destination city.
 		 *
 		 * @param array $package The package being shipped.
 		 */
 		public function calculate_shipping( $package = array() ) {
-			$destination_city            = $this->remove_accents( $package['destination']['city'] );
-			$destination_department_code = $package['destination']['state'];
-			$destination_department      = $this->get_state_name( 'PY', $destination_department_code );
-			$rates                       = $this->get_option( 'rates' );
-			$pickup_locations            = $this->get_option( 'pickup_locations' );
-			$city_rates                  = $this->parse_rates( $rates );
-			$special_rates               = $this->parse_rates( $pickup_locations, false );
-			$default_rate                = $this->get_option( 'default_rate' );
-			$cost                        = $default_rate;
+			$destination_city = $package['destination']['city'];
+			$rates            = $this->get_option( 'rates' );
+			$pickup_locations = $this->get_option( 'pickup_locations' );
+			$city_rates       = $this->parse_rates( $rates );
+			$special_rates    = $this->parse_rates( $pickup_locations, false );
+			$cost             = 0;
 
-			if ( isset( $city_rates[ $destination_city ][ $destination_department ] ) ) {
-				$rate_info = $city_rates[ $destination_city ][ $destination_department ];
-				$cost      = $rate_info['rate'];
+			if ( isset( $city_rates[ $destination_city ] ) ) {
+				$cost = $city_rates[ $destination_city ]['rate'];
 			}
 
 			$rate = array(
 				'id'       => $this->id,
-				'label'    => $this->get_option( 'title' ) . ' a ' . $package['destination']['city'],
+				'label'    => $this->get_option( 'title' ) . ' a ' . $destination_city,
 				'cost'     => $cost,
 				'calc_tax' => 'per_item',
 			);
@@ -111,32 +101,15 @@ if ( ! class_exists( 'WC_Shipping_Paraguay' ) ) {
 			$this->add_rate( $rate );
 
 			foreach ( $special_rates as $location => $rate_cost ) {
-				foreach ( $rate_cost as $rate_display => $cost ) {
-					$pickup_rate = array(
-						'id'       => $this->id . '_' . sanitize_title( $location ),
-						'label'    => $location,
-						'cost'     => $cost,
-						'calc_tax' => 'per_item',
-					);
+				$pickup_rate = array(
+					'id'       => $this->id . '_' . sanitize_title( $location ),
+					'label'    => $location,
+					'cost'     => $rate_cost['rate'],
+					'calc_tax' => 'per_item',
+				);
 
-					$this->add_rate( $pickup_rate );
-				}
+				$this->add_rate( $pickup_rate );
 			}
-		}
-
-		/**
-		 * Get the state name from the state code.
-		 *
-		 * @param string $country Country code.
-		 * @param string $state_code State code.
-		 * @return string State name.
-		 */
-		private function get_state_name( $country, $state_code ) {
-			$states = WC()->countries->get_states( $country );
-			if ( isset( $states[ $state_code ] ) ) {
-				return $this->remove_accents( $states[ $state_code ] );
-			}
-			return $state_code;
 		}
 
 		/**
@@ -146,7 +119,7 @@ if ( ! class_exists( 'WC_Shipping_Paraguay' ) ) {
 		 * @param bool   $normalize Whether to normalize the keys for matching.
 		 * @return array Parsed city rates.
 		 */
-		private function parse_rates( $rates, $normalize = true ) {
+		public function parse_rates( $rates ) {
 			$lines      = explode( "\n", $rates );
 			$city_rates = array();
 
@@ -156,32 +129,39 @@ if ( ! class_exists( 'WC_Shipping_Paraguay' ) ) {
 				$department                       = trim( $department );
 				$rate                             = trim( $rate );
 
-				if ( $normalize ) {
-					$normalized_city       = $this->remove_accents( $city );
-					$normalized_department = $this->remove_accents( $department );
-					$city_rates[ $normalized_city ][ $normalized_department ] = array(
-						'rate'    => $rate,
-						'display' => array(
-							'city'       => $city,
-							'department' => $department,
-						),
-					);
-				} else {
-					$city_rates[ $city ][ $department ] = $rate;
-				}
+				$city_rates[ $city ] = array(
+					'department' => $department,
+					'rate'       => $rate,
+				);
 			}
 
 			return $city_rates;
 		}
 
 		/**
-		 * Remove accents from a string.
+		 * Get the list of cities from the rates settings.
 		 *
-		 * @param string $str The string to normalize.
-		 * @return string The normalized string.
+		 * This method parses the 'rates' option from the plugin settings and extracts the city names.
+		 *
+		 * @return array An associative array of city names and their departments.
 		 */
-		private function remove_accents( $str ) {
-			return strtolower( preg_replace( '/[\x{0300}-\x{036f}]/u', '', normalizer_normalize( $str, Normalizer::FORM_D ) ) );
+		public function get_cities() {
+			$rates  = $this->get_option( 'rates' );
+			$cities = array();
+
+			if ( ! empty( $rates ) ) {
+				$lines = explode( "\n", $rates );
+
+				foreach ( $lines as $line ) {
+					list( $city, $department, $rate ) = explode( '|', trim( $line ) );
+					$cities[ trim( $city ) ]          = array(
+						'department' => trim( $department ),
+						'rate'       => trim( $rate ),
+					);
+				}
+			}
+
+			return $cities;
 		}
 	}
 }
