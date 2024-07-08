@@ -21,6 +21,9 @@ Once the plugin is activated, you can access its functionalities through the Wor
 
 ## Changelog
 
+### 1.2.2
+- Fix validation error when pickup option is selected.
+
 ### 1.2.1
 - Fix normalize city text.
 

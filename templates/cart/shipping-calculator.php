@@ -21,11 +21,13 @@ defined( 'ABSPATH' ) || exit;
 $shipping_methods   = WC()->shipping()->get_shipping_methods();
 $cities             = array();
 $cities_departments = array();
+$special_rates		= array();
 
 if ( isset( $shipping_methods['paraguay_shipping'] ) ) {
 	$paraguay_shipping        = $shipping_methods['paraguay_shipping'];
 	$cities                   = $paraguay_shipping->get_cities();
 	$cities_departments_rates = $paraguay_shipping->parse_rates( $paraguay_shipping->get_option( 'rates' ) );
+	$special_rates 			  = $paraguay_shipping->parse_special_rates( $paraguay_shipping->get_option( 'pickup_locations' ) );
 }
 
 do_action( 'woocommerce_before_shipping_calculator' ); ?>
@@ -121,17 +123,28 @@ do_action( 'woocommerce_before_shipping_calculator' ); ?>
 </form>
 
 <script type="text/javascript">
-	jQuery(document).ready(function($) {
+    jQuery(document).ready(function($) {
 		function validateCitySelection() {
 			var selectedCity = $('#calc_shipping_city').val();
+			var specialRates = <?php echo json_encode(array_keys($special_rates)); ?>;
+
+			// Check if the selected shipping method is a special rate
+			if (specialRates) {
+				// Remove error notice if any and allow proceeding
+				$('.woocommerce-error.select-city-error').remove();
+				return true;
+			}
+
+			// Validate city selection if the shipping method is not a special rate
 			if (!selectedCity) {
 				// Add WooCommerce error notice if it doesn't exist
 				if (!$('.woocommerce-error.select-city-error').length) {
-					$('.woocommerce-notices-wrapper').prepend('<div class="woocommerce-error select-city-error"><?php esc_html_e( 'Seleccione una ciudad de envío antes de realizar el pago.', 'woocommerce' ); ?></div>');
+					$('.woocommerce-notices-wrapper').prepend('<div class="woocommerce-error select-city-error"><?php esc_html_e( 'Seleccione una ciudad de envío válida antes de realizar el pago.', 'woocommerce' ); ?></div>');
 					$('html, body').animate({ scrollTop: 0 }, 'slow'); // Scroll to the top
 				}
 				return false;
 			}
+
 			// Remove error notice if city is selected
 			$('.woocommerce-error.select-city-error').remove();
 			return true;
